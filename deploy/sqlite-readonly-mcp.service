@@ -1,0 +1,23 @@
+# systemd：只读 SQLite MCP 服务单元
+# 部署前：将 WorkingDirectory / ExecStart 路径改为实际安装位置；确保 EnvironmentFile 与下方路径一致
+
+[Unit]
+Description=Read-only SQLite MCP (Streamable HTTP)
+After=network.target
+
+[Service]
+Type=simple
+# Node 进程工作目录（需含编译后的 dist/server.js）
+WorkingDirectory=/opt/sqlite-readonly-mcp
+# 环境变量文件；- 前缀表示文件不存在时不视为错误
+EnvironmentFile=-/etc/sqlite-readonly-mcp.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=5
+
+# 降低攻击面：禁止提权、独立 /tmp
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
